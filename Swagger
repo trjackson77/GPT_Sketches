@@ -1,0 +1,231 @@
+swagger: '2.0'
+info:
+  title: ChatGPT
+  description: Custom Connector to ChatGPT and Whisper
+  version: '1.0'
+host: api.openai.com
+basePath: /
+schemes:
+  - https
+consumes: []
+produces: []
+paths:
+  /v1/images/generations:
+    post:
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              created:
+                type: integer
+                format: int32
+                description: created
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    url:
+                      type: string
+                      description: url
+                description: data
+      summary: Image Generator
+      description: Creates an Image from text description
+      operationId: ImageGenerator
+      parameters:
+        - name: Content-Type
+          in: header
+          required: true
+          type: string
+          default: application/json
+          x-ms-visibility: internal
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              prompt:
+                type: string
+                description: prompt
+                title: Text to Generate images
+                x-ms-visibility: important
+              'n':
+                type: integer
+                format: int32
+                description: 'n'
+                title: Number of Images
+                default: 1
+                x-ms-visibility: important
+                enum:
+                  - 1
+                  - 5
+                  - 10
+              size:
+                type: string
+                description: size
+                title: Size of image
+                default: 1024x1024
+                x-ms-visibility: important
+                enum:
+                  - 256x256
+                  - 512x512
+                  - 1024x1024
+            required:
+              - 'n'
+              - prompt
+              - size
+  /v1/chat/completions:
+    post:
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: id
+              object:
+                type: string
+                description: object
+              created:
+                type: integer
+                format: int32
+                description: created
+              model:
+                type: string
+                description: model
+              usage:
+                type: object
+                properties:
+                  prompt_tokens:
+                    type: integer
+                    format: int32
+                    description: prompt_tokens
+                  completion_tokens:
+                    type: integer
+                    format: int32
+                    description: completion_tokens
+                  total_tokens:
+                    type: integer
+                    format: int32
+                    description: total_tokens
+                description: usage
+              choices:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    message:
+                      type: object
+                      properties:
+                        role:
+                          type: string
+                          description: role
+                        content:
+                          type: string
+                          description: content
+                      description: message
+                    finish_reason:
+                      type: string
+                      description: finish_reason
+                    index:
+                      type: integer
+                      format: int32
+                      description: index
+                description: choices
+      summary: ChatGPT
+      description: Interacts with ChatGPT
+      operationId: Chat
+      parameters:
+        - name: Content-Type
+          in: header
+          required: true
+          type: string
+          default: application/json
+          x-ms-visibility: internal
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              model:
+                type: string
+                description: model
+                title: The model used to power the reply
+                default: gpt-3.5-turbo
+                x-ms-visibility: internal
+                enum:
+                  - gpt-3.5-turbo
+                  - gpt-3.5-turbo-0301
+              messages:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    role:
+                      type: string
+                      description: role
+                      title: Describe the role of the ChatGPT responder
+                      x-ms-visibility: important
+                      default: user
+                    content:
+                      type: string
+                      description: content
+                      title: Enter Prompt
+                      x-ms-visibility: important
+                      default: ...
+                  required:
+                    - content
+                    - role
+                description: messages
+            required:
+              - messages
+              - model
+  /v1/audio/transcriptions:
+    post:
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              text:
+                type: string
+                description: text
+      summary: Whisper Speech to Text
+      operationId: Whisper
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: Content-Type
+          in: header
+          required: false
+          type: string
+        - name: file
+          in: formData
+          type: file
+          required: true
+        - name: filename
+          in: formData
+          type: string
+          required: true
+        - name: model
+          in: formData
+          type: string
+          required: true
+definitions: {}
+parameters: {}
+responses: {}
+securityDefinitions:
+  API Key:
+    type: apiKey
+    in: header
+    name: Authorization
+security:
+  - API Key: []
+tags: []
